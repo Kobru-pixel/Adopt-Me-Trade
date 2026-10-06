@@ -1,5 +1,6 @@
 # Adopt Me Trade
 ## Objetivos
+criar um sistema onde vai ser definido se a troca entre os players será justa ou não. baseado no sistema de valores, no próprio jogo Adoptme do Roblox, use o site como referencia para visualizar os os valores dos itens https://amvgg.com/, fazer também a identificação do pet a partir de reconhecimento de imagem para facilitar a busca, a busca deve ser feita de forma visual e barra de busca com auto complete, o site deve funcionar em múltiplos idiomas.
 
 ### Stack Tecnlógico
 - Backend: PHP estruturado com sessões nativas
