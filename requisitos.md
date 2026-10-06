@@ -11,6 +11,7 @@ criar um sistema onde vai ser definido se a troca entre os players será justa o
 Tratar senhas de usuários com hash bcript
 O sistema deve ter uma página de históricos e manter sempre os logs de qualquer alteração feita por qualquer usuário, para auditorias futuras.
 
+
 ##### Regras Globais
 - Use sempre PDO para conexão e queries no MySQL para evitar SQL Injections
 - Mantenha o código limpo e comente apenas logicas complexas.
