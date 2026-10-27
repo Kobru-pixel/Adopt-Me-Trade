@@ -14,8 +14,11 @@ não pela barra de valor.
 - Frontend: HTML5, PHP, CSS, Tailwind CSS
 
 #### Regras de negócio (CORE)
-Tratar senhas de usuários com hash bcript
-O sistema deve ter uma página de históricos e manter sempre os logs de qualquer alteração feita por qualquer usuário, para auditorias futuras.
+- nosso sistema detecta os pets por camera, ou selecionando eles manualmente.
+- nosso sistema tem um motor de inteligencia artificial para detectar de forma rapida os pets na base.
+- nosso app consegue fazer a leitura da tela do jogo sobrepondo-se para verificar as trades.
+- nossos sistema busca os itens semanalmente os itens da base https://amvgg.com/
+
 
 
 ##### Regras Globais
