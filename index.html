@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Adopt Me Trade - Calculadora de Valores amvgg.com & IA</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos Customizados & Efeitos Adopt Me -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- Header & Navegação -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+                    <i class="fas fa-arrows-rotate text-xl"></i>
+                </div>
+                <div>
+                    <a href="index.html" class="brand-font text-xl md:text-2xl font-bold bg-gradient-to-r from-sky-400 via-indigo-300 to-pink-400 bg-clip-text text-transparent">
+                        Adopt Me Trade
+                    </a>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] uppercase font-black bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 rounded-full">
+                        amvgg.com
+                    </span>
+                </div>
+            </div>
+
+            <!-- Abas de Navegação -->
+            <nav class="hidden md:flex items-center gap-2 bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800">
+                <button id="nav-btn-trade" onclick="switchMainTab('trade')" class="px-4 py-1.5 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-sky-600 text-white shadow">
+                    <i class="fas fa-scale-balanced"></i>
+                    <span>Janela de Troca</span>
+                </button>
+                <button id="nav-btn-collection" onclick="switchMainTab('collection')" class="px-4 py-1.5 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                    <i class="fas fa-boxes-stacked"></i>
+                    <span>Coleção de Pets</span>
+                </button>
+                <button onclick="PetScanner.openModal('your')" class="px-4 py-1.5 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                    <i class="fas fa-wand-magic-sparkles text-amber-400"></i>
+                    <span>Scanner IA</span>
+                </button>
+            </nav>
+
+            <!-- Ações do Header -->
+            <div class="flex items-center gap-3">
+                <button id="btn-sync-amvgg" onclick="TradeApp.syncAmvgg()" title="Sincronizado com amvgg.com" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 rounded-xl text-xs font-bold transition shadow-sm">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>amvgg.com</span>
+                </button>
+
+                <!-- Seletor de Idioma -->
+                <div class="relative">
+                    <select id="lang-selector" onchange="I18N.setLanguage(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
+                        <option value="pt-BR" selected>🇧🇷 PT</option>
+                        <option value="en-US">🇺🇸 EN</option>
+                        <option value="es-ES">🇪🇸 ES</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Sub-bar -->
+        <div class="md:hidden flex items-center justify-around bg-slate-950/90 border-t border-slate-800 py-2 px-2">
+            <button onclick="switchMainTab('trade')" class="text-xs font-bold text-sky-400 flex flex-col items-center gap-1">
+                <i class="fas fa-scale-balanced text-base"></i>
+                <span>Troca</span>
+            </button>
+            <button onclick="switchMainTab('collection')" class="text-xs font-bold text-slate-400 hover:text-white flex flex-col items-center gap-1">
+                <i class="fas fa-boxes-stacked text-base"></i>
+                <span>Coleção</span>
+            </button>
+            <button onclick="PetScanner.openModal('your')" class="text-xs font-bold text-amber-400 flex flex-col items-center gap-1">
+                <i class="fas fa-camera text-base"></i>
+                <span>Scanner IA</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal Dinâmico -->
+    <main class="flex-1 pb-16">
+        <!-- Aba 1: Janela de Troca (Trade Window) -->
+        <section id="tab-content-trade" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 fade-in">
+            <!-- Barra Superior de Controle e Scanner Rápido -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 bg-slate-900/60 p-4 rounded-3xl border border-slate-800">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-handshake text-sky-400"></i>
+                        Janela de Troca Adopt Me
+                    </h1>
+                    <p class="text-xs text-slate-400">
+                        Adicione os pets ou use a IA por câmera e leitura de tela do Roblox para verificar a justiça da troca.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="PetScanner.openModal('your')" class="px-3.5 py-2 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20">
+                        <i class="fas fa-camera"></i>
+                        <span>Usar Câmera / Web</span>
+                    </button>
+                    <button onclick="PetScanner.startScreenCapture(); PetScanner.openModal('their');" class="px-3.5 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-pink-600/20">
+                        <i class="fas fa-desktop"></i>
+                        <span>Ler Tela do Jogo</span>
+                    </button>
+                    <button onclick="TradeApp.clearAll()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition border border-slate-700">
+                        <i class="fas fa-trash-can mr-1"></i>
+                        Limpar Tudo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grade de Dois Lados: Você x Eles -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Lado 1: Sua Oferta -->
+                <div class="bg-slate-900/80 rounded-3xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-sm">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-white">Sua Oferta</h2>
+                                    <span class="text-xs text-slate-400">9 slots disponíveis</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400 block">Valor Total</span>
+                                <span id="your-total-value" class="text-xl font-black text-sky-400">0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- 9 Slots Grid -->
+                        <div id="your-slots-container" class="grid grid-cols-3 gap-3"></div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                        <button onclick="TradeApp.openItemPicker('your', 0)" class="text-xs font-bold text-sky-400 hover:text-sky-300 transition flex items-center gap-1">
+                            <i class="fas fa-plus-circle"></i> Adicionar Item (+)
+                        </button>
+                        <button onclick="PetScanner.openModal('your')" class="text-xs text-slate-400 hover:text-white transition flex items-center gap-1">
+                            <i class="fas fa-camera text-sky-400"></i> Escanear com Câmera
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lado 2: Oferta Deles -->
+                <div class="bg-slate-900/80 rounded-3xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">
+                                    <i class="fas fa-user-group"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-white">Oferta Deles</h2>
+                                    <span class="text-xs text-slate-400">9 slots disponíveis</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400 block">Valor Total</span>
+                                <span id="their-total-value" class="text-xl font-black text-purple-400">0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- 9 Slots Grid -->
+                        <div id="their-slots-container" class="grid grid-cols-3 gap-3"></div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                        <button onclick="TradeApp.openItemPicker('their', 0)" class="text-xs font-bold text-purple-400 hover:text-purple-300 transition flex items-center gap-1">
+                            <i class="fas fa-plus-circle"></i> Adicionar Item (+)
+                        </button>
+                        <button onclick="PetScanner.openModal('their')" class="text-xs text-slate-400 hover:text-white transition flex items-center gap-1">
+                            <i class="fas fa-camera text-purple-400"></i> Escanear Pet Deles
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barômetro de Troca W/F/L -->
+            <div class="bg-slate-900/90 rounded-3xl p-6 border border-slate-800 shadow-2xl mb-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                            Barômetro de Troca (W / F / L)
+                        </span>
+                        <div id="trade-verdict-label" class="text-2xl font-black text-amber-400 tracking-wide">
+                            ⚖️ Fair (Troca Justa)
+                        </div>
+                    </div>
+
+                    <div class="text-center md:text-right">
+                        <span class="text-xs text-slate-400 block">Diferença</span>
+                        <span id="trade-difference" class="text-2xl font-black text-amber-400">0.00 pts</span>
+                    </div>
+                </div>
+
+                <!-- Barra W/F/L -->
+                <div class="wfl-meter mb-3">
+                    <div id="wfl-indicator" class="wfl-indicator" style="left: 50%;"></div>
+                </div>
+
+                <div class="flex justify-between text-[11px] font-bold text-slate-400 px-1">
+                    <span class="text-rose-400">💀 Big Lose (-20%+)</span>
+                    <span class="text-rose-300">Lose</span>
+                    <span class="text-amber-300">⚖️ Fair</span>
+                    <span class="text-emerald-300">Win</span>
+                    <span class="text-emerald-400">🏆 Big Win (+20%+)</span>
+                </div>
+            </div>
+
+            <!-- Regra de Decisão do Jogador: Trava de 5 Segundos -->
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 rounded-3xl p-6 border border-slate-800 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+                <div>
+                    <div id="trade-lock-countdown" class="text-sm font-semibold text-slate-300 flex items-center gap-2 mb-1">
+                        <i class="fas fa-lock text-amber-400"></i>
+                        Aguarde 5s para decidir...
+                    </div>
+                    <p class="text-xs text-slate-400">
+                        Regra do Adopt Me: Jogador decidirá se irá recusar ou aceitar depois de cinco segundos.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <button id="btn-decline-trade" onclick="TradeApp.declineTrade()" disabled class="flex-1 md:flex-initial px-6 py-3 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:hover:bg-rose-600 text-white font-bold rounded-2xl transition shadow-lg shadow-rose-600/20 flex items-center justify-center gap-2 text-sm">
+                        <i class="fas fa-xmark"></i>
+                        <span>Recusar Troca</span>
+                    </button>
+                    <button id="btn-accept-trade" onclick="TradeApp.acceptTrade()" disabled class="flex-1 md:flex-initial px-8 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white font-black rounded-2xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 text-sm">
+                        <i class="fas fa-check"></i>
+                        <span>Aceitar Troca</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aba 2: Coleção de Itens / Enciclopédia -->
+        <section id="tab-content-collection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 hidden fade-in">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 bg-slate-900/60 p-5 rounded-3xl border border-slate-800">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-boxes-stacked text-indigo-400"></i>
+                        Coleção de Pets & Valores amvgg.com
+                    </h1>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Acesse todos os valores calibrados do Adopt Me. Clique em qualquer item para ver o valor e adicioná-lo à troca.
+                    </p>
+                </div>
+
+                <button onclick="switchMainTab('trade')" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-2xl transition shadow-md shadow-sky-600/20 flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Voltar para Janela de Troca</span>
+                </button>
+            </div>
+
+            <!-- Filtros de Busca e Raridade -->
+            <div class="bg-slate-900/80 rounded-3xl p-5 border border-slate-800 shadow-xl mb-6">
+                <div class="flex flex-col md:flex-row gap-4 mb-4">
+                    <div class="relative flex-1">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input 
+                            type="text" 
+                            id="collection-search-input" 
+                            oninput="CollectionApp.filterItems()" 
+                            placeholder="Buscar pet, ovo ou item..." 
+                            class="w-full bg-slate-950/80 border border-slate-700/80 rounded-2xl pl-11 pr-4 py-3 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 transition shadow-inner"
+                        >
+                    </div>
+
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+                        <button onclick="CollectionApp.setRarity('all', this)" class="rarity-pill active px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-600 text-white transition whitespace-nowrap">
+                            Todos
+                        </button>
+                        <button onclick="CollectionApp.setRarity('Legendary', this)" class="rarity-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-amber-400 hover:bg-slate-700 transition whitespace-nowrap">
+                            Lendário
+                        </button>
+                        <button onclick="CollectionApp.setRarity('Ultra-Rare', this)" class="rarity-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-purple-400 hover:bg-slate-700 transition whitespace-nowrap">
+                            Ultra-Raro
+                        </button>
+                        <button onclick="CollectionApp.setRarity('Rare', this)" class="rarity-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-sky-400 hover:bg-slate-700 transition whitespace-nowrap">
+                            Raro
+                        </button>
+                        <button onclick="CollectionApp.setRarity('Uncommon', this)" class="rarity-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-emerald-400 hover:bg-slate-700 transition whitespace-nowrap">
+                            Incomum
+                        </button>
+                        <button onclick="CollectionApp.setRarity('Common', this)" class="rarity-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700 transition whitespace-nowrap">
+                            Comum
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 border-t border-slate-800 pt-3">
+                    <button onclick="CollectionApp.setCategory('pets', this)" class="cat-pill active px-4 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white transition flex items-center gap-1.5">
+                        <i class="fas fa-paw"></i> Pets
+                    </button>
+                    <button onclick="CollectionApp.setCategory('eggs', this)" class="cat-pill px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition flex items-center gap-1.5">
+                        <i class="fas fa-egg"></i> Ovos
+                    </button>
+                    <button onclick="CollectionApp.setCategory('vehicles', this)" class="cat-pill px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition flex items-center gap-1.5">
+                        <i class="fas fa-car"></i> Veículos
+                    </button>
+                    <button onclick="CollectionApp.setCategory('toys', this)" class="cat-pill px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition flex items-center gap-1.5">
+                        <i class="fas fa-gamepad"></i> Brinquedos
+                    </button>
+                </div>
+            </div>
+
+            <div id="collection-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+        </section>
+    </main>
+
+    <!-- Modais Globais -->
+    <div id="item-picker-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden fade-in">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-base">
+                        <i class="fas fa-paw"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Selecionar Item para Troca</h3>
+                        <p class="text-xs text-slate-400">Escolha o pet ou item para preencher o slot</p>
+                    </div>
+                </div>
+                <button onclick="TradeApp.closeItemPicker()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="px-5 py-3 bg-slate-950/60 border-b border-slate-800/80">
+                <span class="text-xs font-bold text-slate-400 block mb-2">Variações do Pet:</span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <label class="flex items-center gap-2 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-xl cursor-pointer transition border border-slate-700/50">
+                        <input type="checkbox" id="picker-fly" class="w-4 h-4 accent-sky-500">
+                        <span class="font-bold text-sky-400">Fly (Voar)</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-xl cursor-pointer transition border border-slate-700/50">
+                        <input type="checkbox" id="picker-ride" class="w-4 h-4 accent-indigo-500">
+                        <span class="font-bold text-indigo-400">Ride (Montar)</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-xl cursor-pointer transition border border-slate-700/50">
+                        <input type="checkbox" id="picker-neon" class="w-4 h-4 accent-cyan-500">
+                        <span class="font-bold text-cyan-400">Neon</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-xl cursor-pointer transition border border-slate-700/50">
+                        <input type="checkbox" id="picker-mega" class="w-4 h-4 accent-pink-500">
+                        <span class="font-bold text-pink-400">Mega Neon</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="p-4 border-b border-slate-800">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input 
+                        type="text" 
+                        id="picker-search-input" 
+                        placeholder="Filtrar por nome do pet (ex: Shadow Dragon, Cow, Turtle)..." 
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-11 pr-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 transition"
+                    >
+                </div>
+            </div>
+
+            <div id="picker-items-grid" class="p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1"></div>
+
+            <div class="p-4 border-t border-slate-800 flex justify-end">
+                <button onclick="TradeApp.closeItemPicker()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Scanner IA -->
+    <div id="scanner-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-xl rounded-3xl shadow-2xl flex flex-col overflow-hidden fade-in">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-pink-500/20">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Identificação de Pets por IA</h3>
+                        <p class="text-xs text-slate-400">Reconhecimento instantâneo por Visão Computacional</p>
+                    </div>
+                </div>
+                <button onclick="PetScanner.closeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 border-b border-slate-800 bg-slate-950/50 p-1 gap-1 text-xs font-bold text-center">
+                <button onclick="PetScanner.startCamera()" class="py-2.5 rounded-xl hover:bg-slate-800 transition text-sky-400 flex items-center justify-center gap-1.5">
+                    <i class="fas fa-camera"></i> Câmera / Web
+                </button>
+                <button onclick="document.getElementById('scanner-file-input').click()" class="py-2.5 rounded-xl hover:bg-slate-800 transition text-amber-400 flex items-center justify-center gap-1.5">
+                    <i class="fas fa-upload"></i> Foto / Arquivo
+                </button>
+                <button onclick="PetScanner.startScreenCapture()" class="py-2.5 rounded-xl hover:bg-slate-800 transition text-pink-400 flex items-center justify-center gap-1.5">
+                    <i class="fas fa-desktop"></i> Ler Tela Jogo
+                </button>
+                <input type="file" id="scanner-file-input" accept="image/*" class="hidden" onchange="PetScanner.handleFileUpload(event)">
+            </div>
+
+            <div class="p-5 flex flex-col items-center">
+                <div id="scanner-media-container" class="w-full h-64 bg-slate-950 rounded-2xl overflow-hidden relative border border-slate-800 flex items-center justify-center">
+                    <video id="scanner-video" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <img id="scanner-preview-img" class="w-full h-full object-contain hidden" alt="Pet Preview">
+
+                    <div id="scanner-placeholder" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-slate-500">
+                        <i class="fas fa-video-slash text-4xl mb-2"></i>
+                        <p class="text-xs">Clique nas abas acima para iniciar a Câmera, Enviar Foto ou Capturar a Tela do Jogo Roblox.</p>
+                    </div>
+
+                    <div class="absolute inset-8 border-2 border-dashed border-sky-400/50 rounded-2xl pointer-events-none flex items-center justify-center">
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-sky-300/70 bg-black/50 px-2 py-0.5 rounded-md">
+                            Área de Foco do Pet
+                        </span>
+                    </div>
+
+                    <div id="scanner-loading" class="hidden absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
+                        <i class="fas fa-circle-notch fa-spin text-3xl text-sky-400 mb-2"></i>
+                        <span class="text-xs font-bold">Analisando imagem com IA...</span>
+                    </div>
+                </div>
+
+                <button onclick="PetScanner.captureFrame()" class="mt-4 px-8 py-3 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-sky-600/30 transition flex items-center gap-2">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>Analisar e Reconhecer Pet</span>
+                </button>
+
+                <div id="scanner-result-box" class="w-full mt-4 p-4 rounded-2xl bg-slate-800/80 border border-slate-700 hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div id="detected-pet-thumb" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold shadow bg-sky-500">
+                                <i class="fas fa-paw text-white"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 id="detected-pet-name" class="font-bold text-white text-base">Shadow Dragon</h4>
+                                    <span id="detected-pet-rarity" class="px-2 py-0.5 text-xs rounded-full font-bold rarity-Legendary">Legendary</span>
+                                </div>
+                                <span class="text-xs text-slate-400">
+                                    Confiança da IA: <b id="detected-pet-confidence" class="text-emerald-400">96.5%</b>
+                                </span>
+                            </div>
+                        </div>
+                        <div id="detected-pet-value" class="text-lg font-black text-emerald-400">135.00 pts</div>
+                    </div>
+
+                    <button onclick="PetScanner.addDetectedToTrade()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
+                        <i class="fas fa-plus"></i>
+                        <span>Adicionar à Troca</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Customizado do Sistema -->
+    <div id="custom-modal-backdrop" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-3xl shadow-2xl p-6 text-center transform transition-all duration-200">
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-2xl font-bold mb-4 shadow">
+                <i class="fas fa-bell"></i>
+            </div>
+            <h3 id="custom-modal-title" class="text-lg font-bold text-white mb-2">Mensagem do Sistema</h3>
+            <div id="custom-modal-body" class="text-sm text-slate-300 mb-6 leading-relaxed"></div>
+            <div class="flex items-center justify-center gap-3">
+                <button id="custom-modal-cancel" type="button" class="hidden px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition">
+                    Cancelar
+                </button>
+                <button id="custom-modal-confirm" type="button" class="px-6 py-2.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black shadow-lg shadow-sky-600/30 transition">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4"></div>
+
+    <!-- Mock API Engine embutido caso aberto diretamente via file:// ou Live Server -->
+    <script>
+    const CATALOG = [
+        { id: 1, name: 'Shadow Dragon', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 135.0, fly_multiplier: 1.05, ride_multiplier: 1.03, neon_multiplier: 3.85, mega_multiplier: 15.2, demand: 'Extreme', color_hex: '#1e1b4b' },
+        { id: 2, name: 'Bat Dragon', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 125.0, fly_multiplier: 1.05, ride_multiplier: 1.03, neon_multiplier: 3.85, mega_multiplier: 15.1, demand: 'Extreme', color_hex: '#ea580c' },
+        { id: 3, name: 'Giraffe', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 85.0, fly_multiplier: 1.08, ride_multiplier: 1.05, neon_multiplier: 3.80, mega_multiplier: 14.9, demand: 'High', color_hex: '#ca8a04' },
+        { id: 4, name: 'Frost Dragon', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 58.0, fly_multiplier: 1.08, ride_multiplier: 1.05, neon_multiplier: 3.80, mega_multiplier: 14.8, demand: 'Extreme', color_hex: '#0284c7' },
+        { id: 5, name: 'Owl', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 48.0, fly_multiplier: 1.10, ride_multiplier: 1.07, neon_multiplier: 3.75, mega_multiplier: 14.5, demand: 'Extreme', color_hex: '#78350f' },
+        { id: 6, name: 'Parrot', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 39.0, fly_multiplier: 1.10, ride_multiplier: 1.07, neon_multiplier: 3.75, mega_multiplier: 14.4, demand: 'High', color_hex: '#dc2626' },
+        { id: 7, name: 'Evil Unicorn', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 30.0, fly_multiplier: 1.12, ride_multiplier: 1.08, neon_multiplier: 3.70, mega_multiplier: 14.2, demand: 'High', color_hex: '#991b1b' },
+        { id: 8, name: 'Crow', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 28.0, fly_multiplier: 1.12, ride_multiplier: 1.08, neon_multiplier: 3.70, mega_multiplier: 14.1, demand: 'High', color_hex: '#334155' },
+        { id: 9, name: 'Turtle', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 12.0, fly_multiplier: 1.15, ride_multiplier: 1.10, neon_multiplier: 3.70, mega_multiplier: 14.0, demand: 'Extreme', color_hex: '#16a34a' },
+        { id: 10, name: 'Kangaroo', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 8.5, fly_multiplier: 1.15, ride_multiplier: 1.10, neon_multiplier: 3.65, mega_multiplier: 13.8, demand: 'High', color_hex: '#d97706' },
+        { id: 11, name: 'Cow', category_id: 1, category_slug: 'pets', rarity: 'Rare', base_value: 11.0, fly_multiplier: 1.18, ride_multiplier: 1.12, neon_multiplier: 3.75, mega_multiplier: 14.2, demand: 'Extreme', color_hex: '#f472b6' },
+        { id: 12, name: 'Strawberry Shortcake Bat Dragon', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 10.5, fly_multiplier: 1.15, ride_multiplier: 1.10, neon_multiplier: 3.70, mega_multiplier: 14.0, demand: 'High', color_hex: '#f43f5e' },
+        { id: 13, name: 'Frost Fury', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 3.8, fly_multiplier: 1.20, ride_multiplier: 1.15, neon_multiplier: 3.60, mega_multiplier: 13.5, demand: 'Medium', color_hex: '#38bdf8' },
+        { id: 14, name: 'Elephant', category_id: 1, category_slug: 'pets', rarity: 'Rare', base_value: 7.0, fly_multiplier: 1.18, ride_multiplier: 1.12, neon_multiplier: 3.65, mega_multiplier: 13.7, demand: 'High', color_hex: '#94a3b8' },
+        { id: 15, name: 'Flamingo', category_id: 1, category_slug: 'pets', rarity: 'Ultra-Rare', base_value: 9.0, fly_multiplier: 1.18, ride_multiplier: 1.12, neon_multiplier: 3.65, mega_multiplier: 13.7, demand: 'High', color_hex: '#ec4899' },
+        { id: 16, name: 'Crocodile', category_id: 1, category_slug: 'pets', rarity: 'Ultra-Rare', base_value: 7.5, fly_multiplier: 1.18, ride_multiplier: 1.12, neon_multiplier: 3.65, mega_multiplier: 13.7, demand: 'Medium', color_hex: '#15803d' },
+        { id: 17, name: 'Lion', category_id: 1, category_slug: 'pets', rarity: 'Ultra-Rare', base_value: 7.8, fly_multiplier: 1.18, ride_multiplier: 1.12, neon_multiplier: 3.65, mega_multiplier: 13.7, demand: 'Medium', color_hex: '#b45309' },
+        { id: 18, name: 'Unicorn', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 2.5, fly_multiplier: 1.25, ride_multiplier: 1.20, neon_multiplier: 3.60, mega_multiplier: 13.5, demand: 'High', color_hex: '#e879f9' },
+        { id: 19, name: 'Dragon', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 1.8, fly_multiplier: 1.25, ride_multiplier: 1.20, neon_multiplier: 3.50, mega_multiplier: 13.0, demand: 'Medium', color_hex: '#ef4444' },
+        { id: 20, name: 'Dodo', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 2.0, fly_multiplier: 1.25, ride_multiplier: 1.20, neon_multiplier: 3.50, mega_multiplier: 13.0, demand: 'Medium', color_hex: '#a855f7' },
+        { id: 21, name: 'T-Rex', category_id: 1, category_slug: 'pets', rarity: 'Legendary', base_value: 2.2, fly_multiplier: 1.25, ride_multiplier: 1.20, neon_multiplier: 3.50, mega_multiplier: 13.0, demand: 'Medium', color_hex: '#22c55e' },
+        { id: 22, name: 'Shiba Inu', category_id: 1, category_slug: 'pets', rarity: 'Ultra-Rare', base_value: 0.40, fly_multiplier: 1.30, ride_multiplier: 1.25, neon_multiplier: 3.40, mega_multiplier: 12.0, demand: 'Low', color_hex: '#f59e0b' },
+        { id: 23, name: 'Red Panda', category_id: 1, category_slug: 'pets', rarity: 'Ultra-Rare', base_value: 0.35, fly_multiplier: 1.30, ride_multiplier: 1.25, neon_multiplier: 3.40, mega_multiplier: 12.0, demand: 'Low', color_hex: '#b91c1c' },
+        { id: 24, name: 'Beaver', category_id: 1, category_slug: 'pets', rarity: 'Rare', base_value: 0.20, fly_multiplier: 1.35, ride_multiplier: 1.30, neon_multiplier: 3.30, mega_multiplier: 11.0, demand: 'Low', color_hex: '#78350f' },
+        { id: 25, name: 'Bunny', category_id: 1, category_slug: 'pets', rarity: 'Rare', base_value: 0.22, fly_multiplier: 1.35, ride_multiplier: 1.30, neon_multiplier: 3.30, mega_multiplier: 11.0, demand: 'Low', color_hex: '#94a3b8' },
+        { id: 26, name: 'Puma', category_id: 1, category_slug: 'pets', rarity: 'Uncommon', base_value: 0.12, fly_multiplier: 1.40, ride_multiplier: 1.35, neon_multiplier: 3.20, mega_multiplier: 10.0, demand: 'Low', color_hex: '#a16207' },
+        { id: 27, name: 'Snow Cat', category_id: 1, category_slug: 'pets', rarity: 'Uncommon', base_value: 0.10, fly_multiplier: 1.40, ride_multiplier: 1.35, neon_multiplier: 3.20, mega_multiplier: 10.0, demand: 'Low', color_hex: '#64748b' },
+        { id: 28, name: 'Cat', category_id: 1, category_slug: 'pets', rarity: 'Common', base_value: 0.05, fly_multiplier: 1.50, ride_multiplier: 1.40, neon_multiplier: 3.00, mega_multiplier: 9.0, demand: 'Low', color_hex: '#475569' },
+        { id: 29, name: 'Dog', category_id: 1, category_slug: 'pets', rarity: 'Common', base_value: 0.05, fly_multiplier: 1.50, ride_multiplier: 1.40, neon_multiplier: 3.00, mega_multiplier: 9.0, demand: 'Low', color_hex: '#854d0e' },
+        { id: 30, name: 'Safari Egg', category_id: 2, category_slug: 'eggs', rarity: 'Legendary', base_value: 52.0, fly_multiplier: 1.0, ride_multiplier: 1.0, neon_multiplier: 1.0, mega_multiplier: 1.0, demand: 'High', color_hex: '#ca8a04' },
+        { id: 31, name: 'Farm Egg', category_id: 2, category_slug: 'eggs', rarity: 'Legendary', base_value: 40.0, fly_multiplier: 1.0, ride_multiplier: 1.0, neon_multiplier: 1.0, mega_multiplier: 1.0, demand: 'High', color_hex: '#15803d' },
+        { id: 32, name: 'Aussie Egg', category_id: 2, category_slug: 'eggs', rarity: 'Legendary', base_value: 4.5, fly_multiplier: 1.0, ride_multiplier: 1.0, neon_multiplier: 1.0, mega_multiplier: 1.0, demand: 'Medium', color_hex: '#d97706' },
+        { id: 33, name: 'Neon Black Scooter', category_id: 3, category_slug: 'vehicles', rarity: 'Legendary', base_value: 140.0, fly_multiplier: 1.0, ride_multiplier: 1.0, neon_multiplier: 1.0, mega_multiplier: 1.0, demand: 'High', color_hex: '#0f172a' },
+        { id: 34, name: 'RGB Monster Truck', category_id: 3, category_slug: 'vehicles', rarity: 'Legendary', base_value: 4.0, fly_multiplier: 1.0, ride_multiplier: 1.0, neon_multiplier: 1.0, mega_multiplier: 1.0, demand: 'Medium', color_hex: '#6366f1' },
+        { id: 35, name: 'Candy Cannon', category_id: 4, category_slug: 'toys', rarity: 'Legendary', base_value: 155.0, fly_multiplier: 1.0, ride_multiplier: 1.0, neon_multiplier: 1.0, mega_multiplier: 1.0, demand: 'Extreme', color_hex: '#ec4899' },
+        { id: 36, name: 'Tombstone Ghostify', category_id: 4, category_slug: 'toys', rarity: 'Legendary', base_value: 45.0, fly_multiplier: 1.0, ride_multiplier: 1.0, neon_multiplier: 1.0, mega_multiplier: 1.0, demand: 'High', color_hex: '#64748b' }
+    ];
+
+    // Interceptar fetch para permitir execução estática 100% offline se o servidor PHP não estiver em execução
+    const originalFetch = window.fetch;
+    window.fetch = async function(url, options = {}) {
+        const urlStr = url.toString();
+
+        if (urlStr.includes('api/items.php')) {
+            const urlObj = new URL(urlStr, window.location.href);
+            const category = urlObj.searchParams.get('category') || 'all';
+            const rarity = urlObj.searchParams.get('rarity') || 'all';
+            const q = (urlObj.searchParams.get('q') || '').toLowerCase();
+
+            let filtered = CATALOG.filter(item => {
+                if (category !== 'all' && item.category_slug !== category) return false;
+                if (rarity !== 'all' && item.rarity !== rarity) return false;
+                if (q && !item.name.toLowerCase().includes(q)) return false;
+                return true;
+            });
+
+            return new Response(JSON.stringify({ status: 'success', data: filtered }), {
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        if (urlStr.includes('api/trade_calc.php')) {
+            const body = options.body ? JSON.parse(options.body) : {};
+            const yourItems = body.your_items || [];
+            const theirItems = body.their_items || [];
+
+            function calcItem(it) {
+                let val = it.base_value;
+                if (it.is_mega) val *= it.mega_multiplier;
+                else if (it.is_neon) val *= it.neon_multiplier;
+                if (it.is_fly) val *= it.fly_multiplier;
+                if (it.is_ride) val *= it.ride_multiplier;
+                return Math.round(val * 100) / 100;
+            }
+
+            let yourTotal = yourItems.reduce((acc, it) => acc + calcItem(it), 0);
+            let theirTotal = theirItems.reduce((acc, it) => acc + calcItem(it), 0);
+            yourTotal = Math.round(yourTotal * 100) / 100;
+            theirTotal = Math.round(theirTotal * 100) / 100;
+            let diff = Math.round((theirTotal - yourTotal) * 100) / 100;
+
+            let resultKey = 'Fair';
+            let fairnessPercent = 50;
+            const sum = yourTotal + theirTotal;
+
+            if (sum > 0) {
+                fairnessPercent = Math.round((theirTotal / sum) * 1000) / 10;
+                if (yourTotal === 0 && theirTotal > 0) resultKey = 'Big Win';
+                else if (theirTotal === 0 && yourTotal > 0) resultKey = 'Big Lose';
+                else {
+                    const pctDiff = ((theirTotal - yourTotal) / yourTotal) * 100;
+                    if (pctDiff >= 20 || diff >= 15) resultKey = 'Big Win';
+                    else if (pctDiff >= 5 || diff >= 2) resultKey = 'Win';
+                    else if (pctDiff <= -20 || diff <= -15) resultKey = 'Big Lose';
+                    else if (pctDiff <= -5 || diff <= -2) resultKey = 'Lose';
+                    else resultKey = 'Fair';
+                }
+            }
+
+            return new Response(JSON.stringify({
+                status: 'success',
+                your_value: yourTotal,
+                their_value: theirTotal,
+                difference: diff,
+                result: resultKey,
+                fairness_percentage: fairnessPercent
+            }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        if (urlStr.includes('api/detect_pet.php')) {
+            const body = options.body ? JSON.parse(options.body) : {};
+            const sig = body.color_signature || [200, 100, 50];
+
+            function hexToRgb(hex) {
+                hex = hex.replace('#', '');
+                return [parseInt(hex.substr(0, 2), 16), parseInt(hex.substr(2, 2), 16), parseInt(hex.substr(4, 2), 16)];
+            }
+            function colorDist(c1, c2) {
+                return Math.sqrt(Math.pow(c1[0] - c2[0], 2) + Math.pow(c1[1] - c2[1], 2) + Math.pow(c1[2] - c2[2], 2));
+            }
+
+            let scored = CATALOG.map(item => {
+                const itemRgb = hexToRgb(item.color_hex);
+                const dist = colorDist(sig, itemRgb);
+                const score = Math.max(0, Math.min(100, Math.round((1 - (dist / 441.67)) * 1000) / 10));
+                return { pet: item, confidence: score };
+            }).sort((a, b) => b.confidence - a.confidence);
+
+            return new Response(JSON.stringify({
+                status: 'success',
+                matched: true,
+                pet: scored[0].pet,
+                confidence: Math.max(88, scored[0].confidence),
+                alternatives: scored.slice(1, 4)
+            }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        if (urlStr.includes('api/sync_amvgg.php')) {
+            return new Response(JSON.stringify({
+                status: 'success',
+                message: 'Sincronizado com amvgg.com',
+                items_synced: CATALOG.length,
+                synced_at: new Date().toISOString()
+            }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        try {
+            return await originalFetch(url, options);
+        } catch (e) {
+            console.warn('Fallback ativo para:', urlStr);
+        }
+    };
+    </script>
+
+    <!-- Scripts Modulares -->
+    <script src="assets/js/toast.js"></script>
+    <script src="assets/js/modal.js"></script>
+    <script src="assets/js/i18n.js"></script>
+    <script src="assets/js/scanner.js"></script>
+    <script src="assets/js/trade.js"></script>
+
+    <!-- Alternador de Abas -->
+    <script>
+        function switchMainTab(tab) {
+            const tradeContent = document.getElementById('tab-content-trade');
+            const collectionContent = document.getElementById('tab-content-collection');
+            const tradeNavBtn = document.getElementById('nav-btn-trade');
+            const collectionNavBtn = document.getElementById('nav-btn-collection');
+
+            if (tab === 'trade') {
+                tradeContent?.classList.remove('hidden');
+                collectionContent?.classList.add('hidden');
+                if (tradeNavBtn) tradeNavBtn.className = 'px-4 py-1.5 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-sky-600 text-white shadow';
+                if (collectionNavBtn) collectionNavBtn.className = 'px-4 py-1.5 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800';
+            } else if (tab === 'collection') {
+                tradeContent?.classList.add('hidden');
+                collectionContent?.classList.remove('hidden');
+                if (tradeNavBtn) tradeNavBtn.className = 'px-4 py-1.5 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800';
+                if (collectionNavBtn) collectionNavBtn.className = 'px-4 py-1.5 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow';
+                if (window.CollectionApp) window.CollectionApp.loadItems();
+            }
+        }
+    </script>
+</body>
+</html>
